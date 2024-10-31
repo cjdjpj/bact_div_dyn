@@ -9,14 +9,12 @@ from sklearn.decomposition import PCA
 l = 1000  # number of genes
 t = 1  # tract length
 nsample = 500  # the number of genomes sampled
-mu = 0.0005  # mutation rate
-r_m = 0
+mu = 3e-6 # mutation rate
+r_m = 0.003
 
 r = r_m * mu
 
-a = 1.0001
 ts = msprime.sim_ancestry(nsample,
-                          model=msprime.BetaCoalescent(alpha=a),
                           ploidy=1,
                           sequence_length=l,
                           gene_conversion_rate=r,
@@ -57,16 +55,16 @@ plt.ylabel("MDS 2")
 
 ### PAIRWISE DISTANCE HISTOGRAM
 plt.figure(figsize = (9,9))
-sns.histplot(distance_list, bins = np.linspace(0, 1, 100));
+sns.histplot(distance_list, bins = np.linspace(0, 0.1, 100));
 plt.xlabel("Pairwise mean number of nucleotide differences (Nei's pi)")
 plt.ylabel("Frequency")
 plt.show()
 
 ### HOPKINS STATISTIC
-print(hopkins.hopkins_statistic(distance_matrix))
+print("hopkins: " + str(hopkins.hopkins_statistic(distance_matrix)))
 
 ### COEFFICIENT OF VARIATION
-print(np.std(distance_list) / np.mean(distance_list))
+print("cv: " + str(np.std(distance_list) / np.mean(distance_list)))
 
 ### KMEANS
 # n_clusters = 4

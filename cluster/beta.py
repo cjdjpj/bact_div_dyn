@@ -1,4 +1,3 @@
-import sys
 import json
 import pickle
 import numpy as np
@@ -9,11 +8,12 @@ import argparse
 parser = argparse.ArgumentParser(
                     prog='beta_coalesce_explicit')
 parser.add_argument('-o', '--output', type=str, default="output")
-parser.add_argument('-l', '--length', type=int, default=100)
+parser.add_argument('-l', '--length', type=int, default=1000)
 parser.add_argument('-t', '--track_length', type=int, default=1)
-parser.add_argument('-n', '--nsample', type=int, default=200)
-parser.add_argument('-m', '--mu', type=float, default=0.0005)
-parser.add_argument('-r', '--r_m', type=float, default=0.0003)
+parser.add_argument('-n', '--nsample', type=int, default=500)
+parser.add_argument('-m', '--mu', type=float, default=0.0000006)
+parser.add_argument('-r', '--r_m', type=float, default=0.1)
+parser.add_argument('--continuous_genome', action='store_true')
 
 def save_metadata(params):
     params_dict = vars(params)
@@ -36,9 +36,10 @@ ts = msprime.sim_ancestry(nsample,
                           ploidy=1,
                           sequence_length=l,
                           gene_conversion_rate=r,
-                          gene_conversion_tract_length=t)
+                          gene_conversion_tract_length=t,
+                          discrete_genome=not args.continuous_genome)
 
-mts = msprime.sim_mutations(ts, rate=mu, model = msprime.InfiniteAlleles())
+mts = msprime.sim_mutations(ts, rate=mu)
 
 pairs = [(i, j) for i in range(nsample) for j in range(i)]
 distance_list = mts.diversity(pairs, mode='site')
