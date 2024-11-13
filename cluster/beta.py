@@ -1,4 +1,5 @@
 import json
+import re
 import pickle
 import numpy as np
 import msprime
@@ -6,13 +7,15 @@ import hopkins
 import argparse
 
 parser = argparse.ArgumentParser(
-                    prog='beta_coalesce_explicit')
-parser.add_argument('-o', '--output', type=str, default="output")
-parser.add_argument('-l', '--length', type=int, default=1000)
-parser.add_argument('-t', '--track_length', type=int, default=1)
-parser.add_argument('-n', '--nsample', type=int, default=500)
-parser.add_argument('-m', '--mu', type=float, default=0.0000006)
-parser.add_argument('-r', '--r_m', type=float, default=0.1)
+                    prog='msprime_simulator')
+parser.add_argument('--output', type=str, default="output")
+parser.add_argument('--Ne', type=int, default=1)
+parser.add_argument('--length', type=int, default=1000)
+parser.add_argument('--track_length', type=int, default=1)
+parser.add_argument('--nsample', type=int, default=500)
+parser.add_argument('--mu', type=float, default=0.0000006)
+parser.add_argument('--r_m', type=float, default=0.1)
+parser.add_argument('--model', type=str, default="beta1.0001")
 parser.add_argument('--continuous_genome', action='store_true')
 
 def save_metadata(params):
@@ -30,14 +33,24 @@ r_m = args.r_m
 
 r = r_m * mu
 
-a = 1.0001
+match = re.match(r"^beta([0-9]*\.[0-9]+)$", args.model)
+if match:
+    a = float(match.group(1))
+    model = msprime.BetaCoalescent(alpha=a)
+elif  args.model == "kingman":
+    model = None
+else:
+    raise ValueError(f"Invalid model argument: {input_str}")
+
 ts = msprime.sim_ancestry(nsample,
-                          model=msprime.BetaCoalescent(alpha=a),
+                          model=model,
+                          population_size=args.Ne,
                           ploidy=1,
                           sequence_length=l,
                           gene_conversion_rate=r,
                           gene_conversion_tract_length=t,
-                          discrete_genome=not args.continuous_genome)
+                          discrete_genome=not args.continuous_genome,
+                          )
 
 mts = msprime.sim_mutations(ts, rate=mu)
 

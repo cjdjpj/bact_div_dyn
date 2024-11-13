@@ -1,2 +1,2 @@
-![hist](hist.png)
-![mds](mds.png)
+![hist](figs/hist.png)
+![mds](figs/mds.png)
